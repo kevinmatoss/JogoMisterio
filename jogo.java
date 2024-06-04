@@ -13,6 +13,7 @@ class Local {
         this.nome = nome;
         this.itens = new ArrayList<>();
         this.acoes = new ArrayList<>();
+
     }
 
     public String getNome() {
@@ -45,7 +46,7 @@ public class JogoMisterio {
     private Map<String, Local> locais;
     private List<String> inventario;
     private Local localAtual;
-
+    
     public JogoMisterio() {
         locais = new HashMap<>();
         inventario = new ArrayList<>();
@@ -57,36 +58,43 @@ public class JogoMisterio {
         Local mercado = new Local("MERCADO MUNICIPAL");
         mercado.adicionarAcao("Ver mercado");
         mercado.adicionarAcao("Perguntar vendedor");
-        mercado.adicionarItem("chave");
-        mercado.adicionarItem("mapa");
+        mercado.adicionarItem("chave - \"Uma chave de ferro enferrujada que pode abrir portas antigas.\"");
+        mercado.adicionarItem("mapa - \"Temos ao norte um beco escuro e ao oeste uma estação de trem.\"");
 
         Local beco = new Local("BECO ESCURO");
         beco.adicionarAcao("Ver beco escuro");
         beco.adicionarAcao("Perguntar informante");
-        beco.adicionarItem("lanterna");
-        beco.adicionarItem("faca");
+        beco.adicionarItem("lanterna - \"Uma lanterna velha e enferrujada que emite uma luz fraca.\"");
+        beco.adicionarItem("faca - \"Uma faca afiada e robusta, útil para se defender de ameaças.\"");
 
         Local mansao = new Local("MANSÃO ABANDONADA");
+        fantasma = false;
         mansao.adicionarAcao("Ver mansão abandonada");
         mansao.adicionarAcao("Perguntar fantasma");
-        mansao.adicionarItem("diario");
-        mansao.adicionarItem("joia");
+        mansao.adicionarItem("diario - \"Um diário empoeirado com páginas amareladas que contém segredos há muito esquecidos.\"");
+        mansao.adicionarItem("joia - \"Uma joia cintilante e rara escondida em uma gaveta empoeirada.\"");
+        
+        Local tunel = new Local("TUNEL SECRETO");
+        tunel.adicionarAcao("Ver tunel");
+        tunel.adicionarAcao("Ler bilhete");
+        tunel.adicionarItem("mapa velho - \"Se quer a relíquia do dragao, siga para o oeste(CEMITERIO ASSOMBRADO)\"");
 
         Local estacao = new Local("ESTAÇÃO DE TREM");
         estacao.adicionarAcao("Ver estação de trem");
         estacao.adicionarAcao("Perguntar viajante");
-        estacao.adicionarItem("bilhete");
-        estacao.adicionarItem("horário");
+        estacao.adicionarItem("bilhete - \"Um bilhete de papel amassado que indica um destino distante.\"");
+        estacao.adicionarItem("horário - \"Um folheto dobrado que lista os horários de partida e chegada dos trens.\"");
 
         Local cemiterio = new Local("CEMITÉRIO ASSOMBRADO");
         cemiterio.adicionarAcao("Ver cemitério assombrado");
         cemiterio.adicionarAcao("Perguntar zelador");
-        cemiterio.adicionarItem("amuleto");
-        cemiterio.adicionarItem("chave");
+        cemiterio.adicionarItem("amuleto - \"Um amuleto de prata adornado com símbolos estranhos e inscrições antigas.\"");
+        cemiterio.adicionarItem("chave - \"Uma chave coberta de ferrugem que pode abrir portões antigos.\"");
 
         locais.put(mercado.getNome(), mercado);
         locais.put(beco.getNome(), beco);
         locais.put(mansao.getNome(), mansao);
+        locais.put(tunel.getNome(), tunel);
         locais.put(estacao.getNome(), estacao);
         locais.put(cemiterio.getNome(), cemiterio);
     }
@@ -164,6 +172,12 @@ public class JogoMisterio {
                     } else if (acaoEscolhida.equals("Perguntar fantasma")) {
                         perguntarFantasma();
                     }
+                } else if (localAtual.getNome().equals("TUNEL SECRETO")){
+                    if (acaoEscolhida.equals("Ver tunel")) {
+                        verTunel();
+                    } else if (acaoEscolhida.equals("Ler bilhete")) {
+                        lerBilhete();
+                    }
                 } else if (localAtual.getNome().equals("ESTAÇÃO DE TREM")) {
                     if (acaoEscolhida.equals("Ver estação de trem")) {
                         verEstacaoDeTrem();
@@ -210,21 +224,27 @@ public class JogoMisterio {
     private void perguntarFantasma() {
         System.out.println("Eu era o mordomo desta mansão antes de minha morte. Há um túnel secreto nos aposentos do antigo senhor, pode ser o que você está procurando.");
     }
+    private void verTunel() {
+        System.out.println("Vejo um bilhete o qual contém algo difícil de ser lido");
+    }
+    private void lerBilhete() {
+        System.out.println("À sua direita contém um mapa. pegue-o");
+    }
 
     private void verEstacaoDeTrem() {
         System.out.println("Vejo um viajante curioso que pode compartilhar histórias sobre suas viagens. Há também um bilhete de trem no chão e um horário de trem pendurado na parede.");
     }
 
     private void perguntarViajante() {
-        System.out.println("Passei pelo mercado hoje e vi um homem suspeito conversando com o vendedor. Eles pareciam falar sobre um local secreto.");
+        System.out.println("Passei pelo mercado hoje e vi um homem estranho carregando algo parecido com a relíquia. Ele entrou em um trem com destino ao sul().");
     }
 
     private void verCemiterio() {
-        System.out.println("Vejo um zelador sombrio que pode oferecer informações sobre o cemitério. Há também um amuleto brilhante em cima de uma lápide e uma chave antiga no chão.");
+        System.out.println("Vejo um zelador taciturno que pode dar pistas sobre o que realmente acontece durante a noite. Há também um amuleto sinistro no chão e uma chave enferrujada encostada em uma lápide.");
     }
 
     private void perguntarZelador() {
-        System.out.println("Se você busca respostas, olhe dentro do mausoléu da família mais antiga da cidade. Muitas histórias obscuras rondam esse lugar.");
+        System.out.println("Se você está procurando algo valioso, sugiro que evite os corredores da ala leste(ESTAÇÂO DE TREM). Muitos intrusos encontraram problemas por lá.");
     }
 
     private void pegarItem() {
