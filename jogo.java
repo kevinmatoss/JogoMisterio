@@ -13,7 +13,6 @@ class Local {
         this.nome = nome;
         this.itens = new ArrayList<>();
         this.acoes = new ArrayList<>();
-
     }
 
     public String getNome() {
@@ -46,10 +45,14 @@ public class JogoMisterio {
     private Map<String, Local> locais;
     private List<String> inventario;
     private Local localAtual;
-    
+    private boolean tunelDesbloqueado; // Flag para desbloquear o tunel
+    private boolean sulSecreto; // Flag para o sul
+    private boolean reliquia; // Flag para fim do jogo
+
     public JogoMisterio() {
         locais = new HashMap<>();
         inventario = new ArrayList<>();
+        tunelDesbloqueado = false;
         inicializarLocais();
         localAtual = locais.get("MERCADO MUNICIPAL");
     }
@@ -68,16 +71,10 @@ public class JogoMisterio {
         beco.adicionarItem("faca - \"Uma faca afiada e robusta, útil para se defender de ameaças.\"");
 
         Local mansao = new Local("MANSÃO ABANDONADA");
-        fantasma = false;
         mansao.adicionarAcao("Ver mansão abandonada");
         mansao.adicionarAcao("Perguntar fantasma");
         mansao.adicionarItem("diario - \"Um diário empoeirado com páginas amareladas que contém segredos há muito esquecidos.\"");
         mansao.adicionarItem("joia - \"Uma joia cintilante e rara escondida em uma gaveta empoeirada.\"");
-        
-        Local tunel = new Local("TUNEL SECRETO");
-        tunel.adicionarAcao("Ver tunel");
-        tunel.adicionarAcao("Ler bilhete");
-        tunel.adicionarItem("mapa velho - \"Se quer a relíquia do dragao, siga para o oeste(CEMITERIO ASSOMBRADO)\"");
 
         Local estacao = new Local("ESTAÇÃO DE TREM");
         estacao.adicionarAcao("Ver estação de trem");
@@ -91,12 +88,14 @@ public class JogoMisterio {
         cemiterio.adicionarItem("amuleto - \"Um amuleto de prata adornado com símbolos estranhos e inscrições antigas.\"");
         cemiterio.adicionarItem("chave - \"Uma chave coberta de ferrugem que pode abrir portões antigos.\"");
 
+        // Locais iniciais
         locais.put(mercado.getNome(), mercado);
         locais.put(beco.getNome(), beco);
         locais.put(mansao.getNome(), mansao);
-        locais.put(tunel.getNome(), tunel);
         locais.put(estacao.getNome(), estacao);
         locais.put(cemiterio.getNome(), cemiterio);
+
+        // Nota: o tunel e o sul nao foram inicializados ainda.
     }
 
     public void jogar() {
@@ -134,7 +133,11 @@ public class JogoMisterio {
                     System.out.println("Ação desconhecida, tente novamente.");
                     break;
             }
-        } while (!acao.equals("sair"));
+            if(reliquia){
+                System.out.println("te vejo na proxima aventura...");
+                break;
+            }
+        } while (!acao.equals("sair") || reliquia == true);
     }
 
     private void explorar() {
@@ -172,12 +175,6 @@ public class JogoMisterio {
                     } else if (acaoEscolhida.equals("Perguntar fantasma")) {
                         perguntarFantasma();
                     }
-                } else if (localAtual.getNome().equals("TUNEL SECRETO")){
-                    if (acaoEscolhida.equals("Ver tunel")) {
-                        verTunel();
-                    } else if (acaoEscolhida.equals("Ler bilhete")) {
-                        lerBilhete();
-                    }
                 } else if (localAtual.getNome().equals("ESTAÇÃO DE TREM")) {
                     if (acaoEscolhida.equals("Ver estação de trem")) {
                         verEstacaoDeTrem();
@@ -189,6 +186,19 @@ public class JogoMisterio {
                         verCemiterio();
                     } else if (acaoEscolhida.equals("Perguntar zelador")) {
                         perguntarZelador();
+                    }
+                } else if (localAtual.getNome().equals("TUNEL SECRETO")) {
+                    if (acaoEscolhida.equals("Ver tunel")) {
+                        verTunel();
+                    } else if (acaoEscolhida.equals("Ler bilhete")) {
+                        lerBilhete();
+                    }
+                } 
+                else if (localAtual.getNome().equals("Sul")) {
+                    if (acaoEscolhida.equals("Ver Sul")) {
+                        verSul();
+                    } else if (acaoEscolhida.equals("Perguntar velho")) {
+                        perguntarVelho();
                     }
                 } else {
                     System.out.println("Você não pode realizar esta ação aqui.");
@@ -223,10 +233,13 @@ public class JogoMisterio {
 
     private void perguntarFantasma() {
         System.out.println("Eu era o mordomo desta mansão antes de minha morte. Há um túnel secreto nos aposentos do antigo senhor, pode ser o que você está procurando.");
+        tunelDesbloqueado = true; // Unlock the tunnel
     }
+
     private void verTunel() {
         System.out.println("Vejo um bilhete o qual contém algo difícil de ser lido");
     }
+
     private void lerBilhete() {
         System.out.println("À sua direita contém um mapa. pegue-o");
     }
@@ -237,6 +250,17 @@ public class JogoMisterio {
 
     private void perguntarViajante() {
         System.out.println("Passei pelo mercado hoje e vi um homem estranho carregando algo parecido com a relíquia. Ele entrou em um trem com destino ao sul().");
+        sulSecreto = true; //Unlock the Sul
+    }
+    private void verSul(){
+        System.out.println("Você está em um ambiente totalmente desconhecido, porém no meio de tanta confusão e cansaço você vê um homem mais velho...");
+    }
+    private void perguntarVelho(){
+        System.out.println("Vocé busca por uma relíquia, né? Aqui, faça bom uso desta...");
+        reliquia = true;
+        if(reliquia){
+            System.out.println("Voce terminou o jogo, parabens!");
+        }
     }
 
     private void verCemiterio() {
@@ -300,9 +324,27 @@ public class JogoMisterio {
     private void mover() {
         System.out.println("Locais disponíveis:");
         List<String> locaisDisponiveis = new ArrayList<>(locais.keySet());
+
+        // Add the tunnel to the list of available locations only if it's unlocked
+        if (tunelDesbloqueado) {
+            Local tunel = new Local("TUNEL SECRETO");
+            tunel.adicionarAcao("Ver tunel");
+            tunel.adicionarAcao("Ler bilhete");
+            tunel.adicionarItem("mapa velho - \"Se quer a relíquia do dragao, siga para o oeste(CEMITERIO ASSOMBRADO)\"");
+            locais.put(tunel.getNome(), tunel);
+        }
+        if (sulSecreto) {
+            Local sul = new Local("Sul");
+            sul.adicionarAcao("Ver Sul");
+            sul.adicionarAcao("Perguntar velho");
+            sul.adicionarItem("Reliquia do Dragao - \"Uma reliquia antiga e perigosa, nao poderia cair em maos erradas...\"");
+            locais.put(sul.getNome(), sul);
+        }
+
         for (int i = 0; i < locaisDisponiveis.size(); i++) {
             System.out.println((i + 1) + ". " + locaisDisponiveis.get(i));
         }
+
         String escolha = scanner.nextLine();
         try {
             int localIndex = Integer.parseInt(escolha) - 1;
